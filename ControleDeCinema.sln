@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Testes", "4. Testes", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Integracao", "ControleDeCinema.Testes.Integracao\ControleDeCinema.Testes.Integracao.csproj", "{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Unitario", "ControleDeCinema.Testes.Unitario\ControleDeCinema.Testes.Unitario.csproj", "{C07D4F30-8B8F-42D6-9884-D721E1135B00}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Unidade", "ControleDeCinema.Testes.Unitario\ControleDeCinema.Testes.Unidade.csproj", "{C07D4F30-8B8F-42D6-9884-D721E1135B00}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Interface", "ControleDeCinema.Testes.Interface\ControleDeCinema.Testes.Interface.csproj", "{650C0B17-FD80-4555-A11F-90150E105DF1}"
 EndProject
