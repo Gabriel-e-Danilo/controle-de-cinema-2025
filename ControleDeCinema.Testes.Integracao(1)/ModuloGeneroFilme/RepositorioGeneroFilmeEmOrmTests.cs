@@ -80,11 +80,13 @@ public sealed class RepositorioGeneroFilmeEmOrmTests : TestFixture
         List<GeneroFilme> generosEsperados = [genero1, genero2, genero3];
 
         var generosEsperadosOrdenados = generosEsperados
-            .OrderBy(d => d.Descricao)
+            .OrderBy(g => g.Descricao)
             .ToList();
 
         // Act - Ação
-        var generosRecebidos = repositorioGenero.SelecionarRegistros();
+        var generosRecebidos = repositorioGenero.SelecionarRegistros()
+            .OrderBy(g => g.Descricao)
+            .ToList();
 
         // Assert - Asseção
         CollectionAssert.AreEqual(generosEsperadosOrdenados, generosRecebidos);

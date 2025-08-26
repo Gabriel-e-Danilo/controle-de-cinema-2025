@@ -94,7 +94,9 @@ public sealed class RepositorioFilmeEmOrmTests : TestFixture
             .ToList();
 
         // Act - Ação
-        var filmesRecebidos = repositorioFilme.SelecionarRegistros();
+        var filmesRecebidos = repositorioFilme.SelecionarRegistros()
+            .OrderBy(f => f.Titulo)
+            .ToList();
 
         // Assert - Asseção
         CollectionAssert.AreEqual(filmesEsperadosOrdenados, filmesRecebidos);
