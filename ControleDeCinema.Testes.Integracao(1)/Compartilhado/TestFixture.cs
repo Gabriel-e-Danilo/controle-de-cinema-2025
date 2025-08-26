@@ -9,15 +9,9 @@ using ControleDeCinema.Infraestrutura.Orm.ModuloSala;
 using ControleDeCinema.Infraestrutura.Orm.ModuloSessao;
 using DotNet.Testcontainers.Containers;
 using FizzWare.NBuilder;
-using Org.BouncyCastle.Tls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Testcontainers.PostgreSql;
 
-namespace ControleDeCinema.Testes.Integracao_1_.Compartilhado
+namespace ControleDeCinema.Testes.Integracao.Compartilhado
 {
     [TestClass]
     public abstract class TestFixture
@@ -32,7 +26,6 @@ namespace ControleDeCinema.Testes.Integracao_1_.Compartilhado
         private static IDatabaseContainer? container;
 
         [AssemblyInitialize]
-
         public static async Task Setup(TestContext _)
         {
             container = new PostgreSqlBuilder()

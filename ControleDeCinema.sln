@@ -19,13 +19,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Aplicacao"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Testes", "4. Testes", "{229C4919-BE59-4706-AA11-84E9540CCC9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Integracao", "ControleDeCinema.Testes.Integracao\ControleDeCinema.Testes.Integracao.csproj", "{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Unidade", "ControleDeCinema.Testes.Unitario\ControleDeCinema.Testes.Unidade.csproj", "{C07D4F30-8B8F-42D6-9884-D721E1135B00}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Interface", "ControleDeCinema.Testes.Interface\ControleDeCinema.Testes.Interface.csproj", "{650C0B17-FD80-4555-A11F-90150E105DF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Integracao(1)", "ControleDeCinema.Testes.Integracao(1)\ControleDeCinema.Testes.Integracao(1).csproj", "{25D6A721-2255-4E14-AD4C-924AD93F2885}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControleDeCinema.Testes.Integracao", "ControleDeCinema.Testes.Integracao(1)\ControleDeCinema.Testes.Integracao.csproj", "{25D6A721-2255-4E14-AD4C-924AD93F2885}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +47,6 @@ Global
 		{EAE3E615-3E4F-4EC0-8849-D69EF8746A21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAE3E615-3E4F-4EC0-8849-D69EF8746A21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAE3E615-3E4F-4EC0-8849-D69EF8746A21}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C39DA48-861A-4CA4-AB9E-9C847A0AC383}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C07D4F30-8B8F-42D6-9884-D721E1135B00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C07D4F30-8B8F-42D6-9884-D721E1135B00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C07D4F30-8B8F-42D6-9884-D721E1135B00}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,7 +68,6 @@ Global
 		{2419C3EA-4F4F-F6DC-4C20-6DA0F41297E3} = {C9BFEEE7-782F-44A7-BE24-A0547110B7C2}
 		{328E3A6D-5500-4F47-AF70-BBC44FF212C1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EAE3E615-3E4F-4EC0-8849-D69EF8746A21} = {C9BFEEE7-782F-44A7-BE24-A0547110B7C2}
-		{9C39DA48-861A-4CA4-AB9E-9C847A0AC383} = {229C4919-BE59-4706-AA11-84E9540CCC9C}
 		{C07D4F30-8B8F-42D6-9884-D721E1135B00} = {229C4919-BE59-4706-AA11-84E9540CCC9C}
 		{650C0B17-FD80-4555-A11F-90150E105DF1} = {229C4919-BE59-4706-AA11-84E9540CCC9C}
 		{25D6A721-2255-4E14-AD4C-924AD93F2885} = {229C4919-BE59-4706-AA11-84E9540CCC9C}
