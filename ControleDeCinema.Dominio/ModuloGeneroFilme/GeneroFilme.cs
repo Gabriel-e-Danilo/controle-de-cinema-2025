@@ -6,7 +6,7 @@ namespace ControleDeCinema.Dominio.ModuloGeneroFilme;
 
 public class GeneroFilme : EntidadeBase<GeneroFilme>
 {
-    public string Descricao { get; set; }
+    public string Descricao { get; set; } = string.Empty;
     public List<Filme> Filmes { get; set; }
 
 
@@ -20,6 +20,20 @@ public class GeneroFilme : EntidadeBase<GeneroFilme>
     {
         Id = Guid.NewGuid();
         Descricao = descricao;
+    }
+
+    public void AdicionarFilme(Filme filme) {
+
+        if (Filmes.Contains(filme)) return;
+
+        Filmes.Add(filme);
+    }
+
+    public void RemoverFilme(Filme filme) {
+
+        if (Filmes.Contains(filme)) return;
+
+        Filmes.Remove(filme);
     }
 
     public override void AtualizarRegistro(GeneroFilme registroEditado)
