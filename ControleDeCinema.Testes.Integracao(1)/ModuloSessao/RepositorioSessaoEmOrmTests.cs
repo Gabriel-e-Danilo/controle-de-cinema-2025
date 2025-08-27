@@ -8,7 +8,7 @@ namespace ControleDeCinema.Testes.Integracao_1_;
 
 [TestClass]
 [TestCategory("Testes de Integração de Sessão")]
-public class RepositorioSessaoEmOrmTest : TestFixture
+public sealed class RepositorioSessaoEmOrmTest : TestFixture
 {
     [TestMethod]
     public void Deve_Cadastrar_Sessao_Corretamente()

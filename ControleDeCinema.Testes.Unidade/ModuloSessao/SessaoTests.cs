@@ -5,7 +5,8 @@ using ControleDeCinema.Dominio.ModuloSessao;
 namespace ControleDeCinema.Testes.Unidade_1_;
 
 [TestClass]
-public class SessaoTests
+[TestCategory("Testes de Unidade de Sessão")]
+public sealed class SessaoTests
 {
     private Filme? filme;
     
