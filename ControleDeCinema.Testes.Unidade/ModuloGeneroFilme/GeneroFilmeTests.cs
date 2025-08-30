@@ -42,4 +42,18 @@ public class GeneroFilmeTests
 
         Assert.IsFalse(generoNaoContemFilme);
     }
+
+    [TestMethod]
+    public void AtualizarRegistro_DeveAtualizarDescricao() {
+
+        // Arrange
+        var generoOriginal = new GeneroFilme("Suspense");
+        var generoEditado = new GeneroFilme("Terror");
+
+        // Act
+        generoOriginal.AtualizarRegistro(generoEditado);
+
+        // Assert
+        Assert.AreEqual("Terror", generoOriginal.Descricao);
+    }
 }

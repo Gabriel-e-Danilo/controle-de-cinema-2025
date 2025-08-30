@@ -26,6 +26,20 @@ public class Filme : EntidadeBase<Filme>
         Genero = genero;
     }
 
+    public void AdicionarSessao(Sessao sessao) {
+
+        if (Sessoes.Contains(sessao)) return;
+
+        Sessoes.Add(sessao);
+    }
+
+    public void RemoverSessao(Sessao sessao) {
+
+        if (!Sessoes.Contains(sessao)) return;
+
+        Sessoes.Remove(sessao);
+    }
+
     public override void AtualizarRegistro(Filme registroEditado)
     {
         Titulo = registroEditado.Titulo;
