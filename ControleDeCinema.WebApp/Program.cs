@@ -72,8 +72,8 @@ public class Program
 
         app.MapHealthChecks("/health");
 
-        //app.UseAuthentication();
-        //app.UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapDefaultControllerRoute();
 
