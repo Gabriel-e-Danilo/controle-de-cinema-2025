@@ -6,7 +6,7 @@ namespace ControleDeCinema.Testes.Integracao_1_.ModuloSala;
 
 [TestClass]
 [TestCategory("Testes de Integração de Sala")]
-public class RepositorioSalaEmOrmTests : TestFixture
+public sealed class RepositorioSalaEmOrmTests : TestFixture
 {
     [TestMethod]
     public void Deve_Cadastrar_Sala_Corretamente() {

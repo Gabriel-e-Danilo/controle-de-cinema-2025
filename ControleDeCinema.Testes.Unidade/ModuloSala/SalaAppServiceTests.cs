@@ -10,7 +10,7 @@ namespace ControleDeCinema.Testes.Unidade.ModuloSala;
 
 [TestClass]
 [TestCategory("Testes de Unidade de Sala")]
-public class SalaAppServiceTests
+public sealed class SalaAppServiceTests
 {
     private Mock<ITenantProvider>? tenantProviderMock;
     private Mock<IRepositorioSala>? repositorioSalaMock;
