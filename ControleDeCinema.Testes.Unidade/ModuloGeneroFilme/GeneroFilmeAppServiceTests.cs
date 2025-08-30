@@ -57,6 +57,7 @@ public sealed class GeneroFilmeAppServiceTests
 
     [TestMethod]
     public void Cadastrar_DeveRetornarFalha_QuandoGeneroForDuplicado() {
+
         // Arrange
         var genero = new GeneroFilme("Suspense");
         var generoTeste = new GeneroFilme("Suspense");
@@ -132,6 +133,7 @@ public sealed class GeneroFilmeAppServiceTests
 
     [TestMethod]
     public void Editar_DeveRetornarFalha_QuandoGeneroForDuplicado() {
+
         // Arrange
         var genero = new GeneroFilme("Suspense");
         var generoEditado = new GeneroFilme("Terror");
