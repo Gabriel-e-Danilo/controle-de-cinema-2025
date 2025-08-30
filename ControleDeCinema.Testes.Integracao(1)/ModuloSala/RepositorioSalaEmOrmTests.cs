@@ -9,7 +9,7 @@ namespace ControleDeCinema.Testes.Integracao_1_.ModuloSala;
 public sealed class RepositorioSalaEmOrmTests : TestFixture
 {
     [TestMethod]
-    public void Deve_Cadastrar_Sala_Corretamente() {
+    public sealed void Deve_Cadastrar_Sala_Corretamente() {
 
         // Arrange
         var sala = new Sala(1, 45);

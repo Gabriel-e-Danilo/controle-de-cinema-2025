@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ControleDeCinema.Aplicacao\ControleDeCinema.Aplicacao.csproj" />
+    <ProjectReference Include="..\ControleDeCinema.Dominio\ControleDeCinema.Dominio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
