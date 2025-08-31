@@ -18,7 +18,7 @@ namespace ControleDeCinema.Testes.Interface.ModuloSessao
             this.driver = driver;
 
 
-            wait.Until(d => d.FindElement(By.CssSelector("table")).Displayed);
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
         public SessaoIndexPageObject IrPara(string enderecoBase)
