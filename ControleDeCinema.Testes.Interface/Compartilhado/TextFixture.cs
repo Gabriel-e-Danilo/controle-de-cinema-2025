@@ -1,189 +1,109 @@
 using ControleDeCinema.Infraestrutura.Orm.Compartilhado;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Remote;
-using Testcontainers.PostgreSql;
+using OpenQA.Selenium.Support.UI;
 
 namespace ControleDeCinema.Testes.Interface;
 
 [TestClass]
-public abstract class TestFixture
+public abstract class TestFixture : IDisposable
 {
     protected static IWebDriver? driver;
-    protected static string? enderecoBase;
+    protected static ControleDeCinemaDbContext? dbContext;
 
-    private static IConfiguration? configuracao;
-    private static DotNet.Testcontainers.Networks.INetwork? rede;
-
-    private static IDatabaseContainer? dbContainer;
-    private readonly static int dbPort = 5432;
-
-    private static IContainer? appContainer;
-    private readonly static int appPort = 8080;
-
-    private static IContainer? seleniumContainer;
-    private readonly static int seleniumPort = 4444;
-
-    private static ControleDeCinemaDbContext? dbContext;
+    protected static string enderecoBase = "https://localhost:7131";
+    private static string connectionString = "Host=localhost;Port=5432;Database=ControleDeCinemaDb;Username=postgres;Password=YourStrongPassword";
 
     [AssemblyInitialize]
-    public static async Task ConfigurarTestes(TestContext _)
-    {
-        configuracao = new ConfigurationBuilder()
-            .AddUserSecrets<TestFixture>()
-            .AddEnvironmentVariables()
-            .Build();
-
-        rede = new NetworkBuilder()
-            .WithName(Guid.NewGuid().ToString("D"))
-            .WithCleanUp(true)
-            .Build();
-
-        await InicializarBancoDadosAsync();
-
-        await InicializarAplicacaoAsync();
-
-        await InicializarWebDriverAsync();
+    public static void ConfigurarTestes(TestContext _) {
+        InicializarWebDriver();
     }
 
     [AssemblyCleanup]
-    public static async Task EncerrarTestes()
-    {
-        await EncerrarWebDriverAsync();
-
-        await EncerrarAplicacaoAsync();
-
-        await EncerrarBancoDadosAsync();
+    public static void EncerrarTestes() {
+        EncerrarWebDriver();
     }
 
     [TestInitialize]
-    public void InicializarTeste()
-    {
-        if (dbContainer is null)
-            throw new ArgumentNullException("O banco de dados não foi inicializado.");
-
-        dbContext = ControleDeCinemaDbContextFactory.CriarDbContext(dbContainer.GetConnectionString());
+    public void ConfigurarTestes() {
+        dbContext = ControleDeCinemaDbContextFactory.CriarDbContext(connectionString);
 
         ConfigurarTabelas(dbContext);
+
+        InicializarWebDriver();
     }
 
-    private static void ConfigurarTabelas(ControleDeCinemaDbContext dbContext)
-    {
+    private static void InicializarWebDriver() {
+        var options = new ChromeOptions();
+
+        // options.AddArgument("--headless");
+
+        driver = new ChromeDriver(options);
+    }
+
+    private static void EncerrarWebDriver() {
+        driver?.Quit();
+        driver?.Dispose();
+    }
+
+    private static void ConfigurarTabelas(ControleDeCinemaDbContext dbContext) {
         dbContext.Database.EnsureCreated();
 
-        dbContext.Filmes.RemoveRange(dbContext.Filmes);
         dbContext.GenerosFilme.RemoveRange(dbContext.GenerosFilme);
+        dbContext.Filmes.RemoveRange(dbContext.Filmes);
         dbContext.Salas.RemoveRange(dbContext.Salas);
         dbContext.Sessoes.RemoveRange(dbContext.Sessoes);
-        dbContext.Ingressos.RemoveRange(dbContext.Ingressos);
 
         dbContext.SaveChanges();
     }
 
-    private static async Task InicializarBancoDadosAsync()
-    {
-        dbContainer = new PostgreSqlBuilder()
-          .WithImage("postgres:16")
-          .WithPortBinding(dbPort, true)
-          .WithNetwork(rede)
-          .WithNetworkAliases("controle-de-cinema-e2e-testdb")
-          .WithName("controle-de-cinema-e2e-testdb")
-          .WithDatabase("ControleDeCinemaTestDb")
-          .WithUsername("postgres")
-          .WithPassword("MyStrongPassword")
-          .WithCleanUp(true)
-          .WithWaitStrategy(Wait.ForUnixContainer()
-            .UntilPortIsAvailable(dbPort)
-          )
-          .Build();
+    protected static void RegistrarContaEmpresarial() {
 
-        await dbContainer.StartAsync();
+        if (driver is null)
+            throw new ArgumentNullException(nameof(driver));
+
+        driver.Manage().Cookies.DeleteAllCookies();
+
+        driver.Navigate().GoToUrl($"{enderecoBase}/autenticacao/registro");
+
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+
+        var inputEmail = wait.Until(d => d.FindElement(By.Id("Email")));
+        var inputSenha = wait.Until(d => d.FindElement(By.Id("Senha")));
+        var inputConfirmarSenha = wait.Until(d => d.FindElement(By.Id("ConfirmarSenha")));
+        var selectTipoUsuario = new SelectElement(wait.Until(d => d.FindElement(By.Id("Tipo"))));
+
+        inputEmail.Clear();
+        inputEmail.SendKeys("empresa@dominio.com");
+
+        inputSenha.Clear();
+        inputSenha.SendKeys("Teste@123");
+
+        inputConfirmarSenha.Clear();
+        inputConfirmarSenha.SendKeys("Teste@123");
+
+        selectTipoUsuario.SelectByText("Empresa");
+
+        wait.Until(d => {
+            var btn = d.FindElement(By.CssSelector("button[type='submit']"));
+
+            if (!btn.Enabled || !btn.Displayed) return false;
+
+            btn.Click();
+
+            return true;
+        });
+
+        wait.Until(d =>
+                    !d.Url.Contains("/autenticacao/registro", StringComparison.OrdinalIgnoreCase) &&
+                    d.FindElements(By.CssSelector("form[action='/autenticacao/registro']")).Count == 0
+                );
+
+        wait.Until(d => d.FindElements(By.CssSelector("form[action='/autenticacao/logout']")).Count > 0);
     }
 
-    private static async Task InicializarAplicacaoAsync()
+    public void Dispose()
     {
-        // Configura a imagem à partir do Dockerfile
-        var imagem = new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
-            .WithDockerfile("Dockerfile")
-            .WithBuildArgument("RESOURCE_REAPER_SESSION_ID", ResourceReaper.DefaultSessionId.ToString("D"))
-            .WithName("controle-de-cinema-e2e:latest")
-            .Build();
-
-        await imagem.CreateAsync().ConfigureAwait(false);
-
-        // Configura a connection string para a rede: "Host=teste-facil-e2e-testdb;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword"
-        var connectionStringRede = dbContainer?.GetConnectionString()
-            .Replace(dbContainer.Hostname, "controle-de-cinema-e2e-testdb")
-            .Replace(dbContainer.GetMappedPublicPort(dbPort).ToString(), dbPort.ToString());
-
-        // Configura o container da aplicação e inicializa o enderecoBase
-        appContainer = new ContainerBuilder()
-            .WithImage(imagem)
-            .WithPortBinding(appPort, true)
-            .WithNetwork(rede)
-            .WithNetworkAliases("controle-de-cinema-webapp")
-            .WithName("controle-de-cinema-webapp")
-            .WithEnvironment("SQL_CONNECTION_STRING", connectionStringRede)
-            .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilPortIsAvailable(appPort)
-                .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)appPort).ForPath("/health"))
-            )
-            .WithCleanUp(true)
-            .Build();
-
-        await appContainer.StartAsync();
-
-        // URL interno: http://teste-facil-webapp:8080
-        enderecoBase = $"http://{appContainer.Name}:{appPort}";
-    }
-
-    private static async Task InicializarWebDriverAsync()
-    {
-        seleniumContainer = new ContainerBuilder()
-            .WithImage("selenium/standalone-chrome:nightly")
-            .WithPortBinding(seleniumPort, true)
-            .WithNetwork(rede)
-            .WithNetworkAliases("controle-de-cinema-selenium-e2e")
-            .WithExtraHost("host.docker.internal", "host-gateway")
-            .WithName("controle-de-cinema-selenium-e2e")
-            .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilPortIsAvailable(seleniumPort)
-            )
-            .Build();
-
-        await seleniumContainer.StartAsync();
-
-        var enderecoSelenium = new Uri($"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub");
-
-        var options = new ChromeOptions();
-
-        driver = new RemoteWebDriver(enderecoSelenium, options);
-    }
-
-    private static async Task EncerrarBancoDadosAsync()
-    {
-        if (dbContainer is not null)
-            await dbContainer.DisposeAsync();
-    }
-
-    private static async Task EncerrarAplicacaoAsync()
-    {
-        if (appContainer is not null)
-            await appContainer.DisposeAsync();
-    }
-
-    private static async Task EncerrarWebDriverAsync()
-    {
-        driver?.Quit();
-        driver?.Dispose();
-
-        if (seleniumContainer is not null)
-            await seleniumContainer.DisposeAsync();
+        // Cleanup se necessário
     }
 }
