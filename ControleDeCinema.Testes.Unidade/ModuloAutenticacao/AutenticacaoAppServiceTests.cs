@@ -47,9 +47,20 @@ public sealed class AutenticacaoAppServiceTests
 
         autenticacaoAppService!.RegistrarAsync(empresa, "Senha@123", TipoUsuario.Empresa).Wait();
 
-       
+        Assert.IsTrue(empresa.UserName.Equals("empresa_teste"));
+    }
 
+    [TestMethod]
+    public void DeveCadastrarClienteComSucesso()
+    {
+        var cliente = new Usuario
+        {
+            UserName = "cliente_teste",
+            Email = "cliente@gmail.com"
+        };
 
-
+        autenticacaoAppService!.RegistrarAsync(cliente, "Senha@123", TipoUsuario.Cliente).Wait();
+        
+        Assert.IsTrue(cliente.UserName.Equals("cliente_teste"));
     }
 }

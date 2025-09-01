@@ -58,6 +58,7 @@ public sealed class SessaoInterfaceTests : TestFixture
     public void Deve_Excluir_Sessao()
     {
         // logica de criação do filme e da sala
+
         var sessaoIndex = new SessaoIndexPageObject(driver!)
             .IrPara(enderecoBase);
         
