@@ -96,6 +96,9 @@ public abstract class TestFixture : IDisposable
         options.AddArgument("--window-size=1920,1080");
 
         driver = new RemoteWebDriver(enderecoSelenium, options.ToCapabilities(), TimeSpan.FromSeconds(120));
+        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(90);
+        driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
+        driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
     }
 
     private static async Task InicializarBancoAsync(DotNet.Testcontainers.Networks.INetwork rede) {

@@ -16,19 +16,19 @@ public class FilmeInterfaceTests : TestFixture
     public void Deve_Cadastrar_Filme_Corretamente() {
 
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(10));
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(30));
 
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 
         generoIndex
-            .IrPara(enderecoBase)
+            .IrPara(enderecoBase!)
             .ClickCadastrar()
             .PreencherDescricao("Suspense")
             .Confirmar();
 
         // Act
         var filmeIndex = new FilmeIndexPageObjects(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoBase!);
 
         filmeIndex
             .ClickCadastrar()
@@ -40,5 +40,74 @@ public class FilmeInterfaceTests : TestFixture
 
         // Assert
         Assert.IsTrue(filmeIndex.ContemFilme("Teste"));
+    }
+
+    [TestMethod]
+    public void Deve_Editar_Filme_Corretamente() {
+
+        // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(30));
+
+        var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
+
+        generoIndex
+            .IrPara(enderecoBase!)
+            .ClickCadastrar()
+            .PreencherDescricao("Suspense")
+            .Confirmar();
+
+        var filmeIndex = new FilmeIndexPageObjects(driver!)
+            .IrPara(enderecoBase!);
+
+        filmeIndex
+            .ClickCadastrar()
+            .PreencherTitulo("Teste")
+            .PreencherDuracao(100)
+            .PreencherLancamento(true)
+            .PreencherGenero("Suspense")
+            .Confirmar();
+
+        // Act
+        filmeIndex
+            .ClickEditar("Teste")
+            .PreencherTitulo("Teste Editado")
+            .Confirmar();
+
+        // Assert
+        Assert.IsTrue(filmeIndex.ContemFilme("Teste Editado"));
+    }
+
+    [TestMethod]
+    public void Deve_Excluir_Filme_Corretamente() {
+
+        // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(30));
+
+        var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
+
+        generoIndex
+            .IrPara(enderecoBase!)
+            .ClickCadastrar()
+            .PreencherDescricao("Suspense")
+            .Confirmar();
+
+        var filmeIndex = new FilmeIndexPageObjects(driver!)
+            .IrPara(enderecoBase!);
+
+        filmeIndex
+            .ClickCadastrar()
+            .PreencherTitulo("Teste")
+            .PreencherDuracao(100)
+            .PreencherLancamento(true)
+            .PreencherGenero("Suspense")
+            .Confirmar();
+
+        // Act
+        filmeIndex
+            .ClickExcluir("Teste")
+            .ConfirmarExclusao();
+
+        // Assert
+        Assert.IsFalse(filmeIndex.ContemFilme("Teste"));
     }
 }

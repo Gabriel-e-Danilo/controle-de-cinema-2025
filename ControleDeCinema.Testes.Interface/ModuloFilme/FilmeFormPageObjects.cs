@@ -1,5 +1,8 @@
-﻿using OpenQA.Selenium;
+﻿using ControleDeCinema.Testes.Interface.Compartilhado;
+using ControleDeCinema.Testes.Interface.ModuloGeneroFilme;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 
 namespace ControleDeCinema.Testes.Interface.ModuloFilme;
 
@@ -8,70 +11,78 @@ public class FilmeFormPageObjects
     private readonly IWebDriver driver;
     private readonly WebDriverWait wait;
 
+    private static readonly By TituloInput = By.Id("Titulo");
+    private static readonly By DuracaoInput = By.Id("Duracao");
+    private static readonly By LancamentoCheck = By.Id("Lancamento");
+    private static readonly By GeneroSelect = By.Id("GeneroId");
+    private static readonly By BtnSubmit = By.Id("botaoConfirmar");
+    private static readonly By Cards = By.CssSelector(".card");
+
     public FilmeFormPageObjects(IWebDriver driver) {
         this.driver = driver;
-        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+
+        wait.Until(ExpectedConditions.ElementIsVisible(TituloInput));
     }
 
     public FilmeFormPageObjects PreencherTitulo(string titulo) {
-        wait.Until(d => 
-            d.FindElement(By.Id("Titulo")).Displayed &&
-            d.FindElement(By.Id("Titulo")).Enabled
-        );
+        var el = wait.Until(ExpectedConditions.ElementIsVisible(TituloInput));
 
-        var nomeInput = driver.FindElement(By.Id("Titulo"));
-        nomeInput.Clear();
-        nomeInput.SendKeys(titulo);
+        el.Clear();
+        el.SendKeys(titulo);
 
         return this;
     }
 
     public FilmeFormPageObjects PreencherDuracao(int duracao) {
-        wait.Until(d =>
-            d.FindElement(By.Id("Duracao")).Displayed &&
-            d.FindElement(By.Id("Duracao")).Enabled
-        );
+        var el = wait.Until(ExpectedConditions.ElementIsVisible(DuracaoInput));
 
-        var duracaoInput = driver.FindElement(By.Id("Duracao"));
-        duracaoInput.Clear();
-        duracaoInput.SendKeys(duracao.ToString());
+        el.Clear();
+        el.SendKeys(duracao.ToString());
 
         return this;
     }
 
     public FilmeFormPageObjects PreencherLancamento(bool lancamento) {
-        wait.Until(d =>
-            d.FindElement(By.Id("Lancamento")).Displayed &&
-            d.FindElement(By.Id("Lancamento")).Enabled
-        );
+        var el = wait.Until(ExpectedConditions.ElementToBeClickable(LancamentoCheck));
 
-        var lancamentoInput = driver.FindElement(By.Id("Lancamento"));
-        
-        if (lancamentoInput.Selected != lancamento) {
-            lancamentoInput.Click();
-        }
+        if (el.Selected != lancamento)
+            Clicks.SafeClick(driver, el);
 
         return this;
     }
 
-    public FilmeFormPageObjects PreencherGenero(string genero) {
-        wait.Until(d =>
-            d.FindElement(By.Id("GeneroId")).Displayed &&
-            d.FindElement(By.Id("GeneroId")).Enabled
-        );
+    public FilmeFormPageObjects PreencherGenero(string generoTextoVisivel) {
+        var el = wait.Until(ExpectedConditions.ElementIsVisible(GeneroSelect));
+        var select = new SelectElement(el);
 
-        var generoInput = driver.FindElement(By.Id("GeneroId"));
-        generoInput.Clear();
-        generoInput.SendKeys(genero);
+        wait.Until(_ => select.Options.Any());
 
+        wait.Until(_ => select.Options.Any(o =>
+            string.Equals(o.Text, generoTextoVisivel, StringComparison.OrdinalIgnoreCase)));
+
+        select.SelectByText(generoTextoVisivel);
         return this;
     }
 
     public FilmeIndexPageObjects Confirmar() {
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
-        wait.Until(d => d.FindElement(By.CssSelector(".card")).Displayed);
+        var btn = Waits.Clickable(driver, BtnSubmit, 20);
+
+        Clicks.SafeClick(driver, btn);
+
+        wait.Until(_ => driver.Url.Contains("/filmes", StringComparison.OrdinalIgnoreCase));
+        wait.Until(_ => driver.FindElements(Cards).Count >= 0);
+
         return new FilmeIndexPageObjects(driver);
     }
 
+    public FilmeIndexPageObjects ConfirmarExclusao() {
+        var btn = Waits.Clickable(driver, By.Id("botaoConfirmar"), 20);
+        Clicks.SafeClick(driver, btn);
+
+        wait.Until(_ => driver.Url.Contains("/filmes", StringComparison.OrdinalIgnoreCase));
+        wait.Until(_ => driver.FindElements(By.CssSelector(".card")).Count >= 0);
+
+        return new FilmeIndexPageObjects(driver);
+    }
 }

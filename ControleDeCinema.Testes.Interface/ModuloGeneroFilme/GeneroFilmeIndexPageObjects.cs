@@ -23,6 +23,7 @@ public class GeneroFilmeIndexPageObjects
     public GeneroFilmeIndexPageObjects IrPara(string enderecoBase) {
         driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "generos"));
 
+        // aguarda
         wait.Until(ExpectedConditions.ElementExists(BtnCadastrar));
         wait.Until(d => d.FindElements(Cards).Count >= 0);
 
