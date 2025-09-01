@@ -1,7 +1,12 @@
 using ControleDeCinema.Infraestrutura.Orm.Compartilhado;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
+using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
+using Testcontainers.PostgreSql;
 
 namespace ControleDeCinema.Testes.Interface;
 
@@ -10,50 +15,177 @@ public abstract class TestFixture : IDisposable
 {
     protected static IWebDriver? driver;
     protected static ControleDeCinemaDbContext? dbContext;
-
-    protected static string enderecoBase = "https://localhost:7131";
-    private static string connectionString = "Host=localhost;Port=5432;Database=ControleDeCinemaDb;Username=postgres;Password=YourStrongPassword";
+    protected static string? enderecoBase;
 
     private static IReadOnlyCollection<Cookie>? cookies;
     private static bool usuarioRegistrado = false;
 
+    private static IDatabaseContainer? dbContainer;
+    private readonly static int dbPort = 5432;
+
+    private static IContainer? appContainer;
+    private readonly static int appPort = 8080;
+
+    private static IContainer? seleniumContainer;
+    private readonly static int seleniumPort = 4444;
+
+    private static IConfiguration? configuracao;
+
     [AssemblyInitialize]
-    public static void ConfigurarTestes(TestContext _) {
-        InicializarWebDriver();
+    public static async Task ConfigurarTestes(TestContext _) {
+
+        configuracao = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .AddUserSecrets<TestFixture>()
+            .Build();
+
+        var rede = new NetworkBuilder()
+            .WithName(Guid.NewGuid().ToString())
+            .WithCleanUp(true)
+            .Build();
+
+        await InicializarBancoAsync(rede);
+        
+        // inicia como container
+        await InicializarAplicacaoAsync(rede);
+
+        await InicializarWebDriverAsync(rede);
     }
 
     [AssemblyCleanup]
-    public static void EncerrarTestes() {
-        EncerrarWebDriver();
+    public static async Task EncerrarTestes() {
+        await EncerrarWebDriverAsync();
+
+        await EncerrarAplicacaoAsync();
+
+        await EncerrarBancoAsync();
     }
 
     [TestInitialize]
-    public void ConfigurarTestes() {
-        dbContext = ControleDeCinemaDbContextFactory.CriarDbContext(connectionString);
+    public void InicializarTeste() {
+        dbContext = ControleDeCinemaDbContextFactory.CriarDbContext(dbContainer!.GetConnectionString());
 
         ConfigurarTabelas(dbContext);
-
-        InicializarWebDriver();
         
-        if (cookies != null && cookies.Any())
+        if (cookies is not null && cookies.Any())
             ReaplicarCookies(driver!, cookies);
     }
 
-    private static void InicializarWebDriver() {
-        var options = new ChromeOptions();
+    private static async Task InicializarWebDriverAsync(DotNet.Testcontainers.Networks.INetwork rede) {
+        seleniumContainer = new ContainerBuilder()
+            .WithImage("selenium/standalone-chrome:latest")
+            .WithPortBinding(seleniumPort, true)
+            .WithNetwork(rede)
+            .WithNetworkAliases("controle-de-cinema-selenium-e2e")
+            .WithExtraHost("host.docker.internal", "host-gateway")
+            .WithName("controle-de-cinema-selenium-e2e")          
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(seleniumPort)
+                .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)seleniumPort).ForPath("/wd/hub/status")))
+            .WithCleanUp(true)
+            .Build(); 
+        
+        await seleniumContainer.StartAsync();
 
-        //options.AddArgument("--headless");
+        var enderecoSelenium = new Uri($"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub");
 
-        driver = new ChromeDriver(options);
+        var options = new ChromeOptions();        
+        options.AddArgument($"--headless=new");
+        options.AddArgument("--no-sandbox");
+        options.AddArgument("--disable-dev-shm-usage");
+        options.AddArgument("--window-size=1920,1080");
+
+        driver = new RemoteWebDriver(enderecoSelenium, options.ToCapabilities(), TimeSpan.FromSeconds(120));
     }
 
-    private static void EncerrarWebDriver() {
+    private static async Task InicializarBancoAsync(DotNet.Testcontainers.Networks.INetwork rede) {
+        dbContainer = new PostgreSqlBuilder() // DOCKER
+             .WithImage("postgres:16")
+             .WithPortBinding(dbPort, true)
+             .WithNetwork(rede)
+             .WithNetworkAliases("controle-de-cinema-e2e-testdb")
+             .WithName("controle-de-cinema-e2e-testdb")
+             .WithDatabase("ControleCinemaDB")
+             .WithUsername("postgres")
+             .WithPassword("MyStrongPassword")
+             .WithCleanUp(true)
+             .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(dbPort))
+             .Build();
+
+        await dbContainer.StartAsync();
+    }
+
+    private static async Task InicializarAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork rede) {
+        
+        // config imagem do Dockerfile
+        var imagem = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
+            .WithDockerfile("Dockerfile")
+            .WithBuildArgument("RESOURCE_REAPER_SESSION_ID", ResourceReaper.DefaultSessionId.ToString("D"))
+            .WithName("controle-de-cinema-app-e2e:latest")
+            .Build();
+
+        await imagem.CreateAsync()
+            .ConfigureAwait(false);
+
+        // config connectionString
+        // dbContainer.GetConnectionString() = $"Host=127.0.0.1;Port=5432;Database=ControleDeCinemaDb;Username=postgres;Password=MyStrongPassword";
+        var connectionStringRede = dbContainer?.GetConnectionString()
+            .Replace(dbContainer.Hostname, "controle-de-cinema-e2e-testdb")
+            .Replace(dbContainer.GetMappedPublicPort(5432).ToString(), "5432");
+
+
+        // config aplicacao
+        appContainer = new ContainerBuilder()
+            .WithImage(imagem)            
+            .WithPortBinding(appPort, true)
+            .WithNetwork(rede)
+            .WithNetworkAliases("controle-de-cinema-webapp")
+            .WithName("controle-de-cinema-webapp")
+            .WithEnvironment("SQL_CONNECTION_STRING", connectionStringRede)
+            .WithEnvironment("NEWRELIC_LICENSE_KEY", configuracao?["NEWRELIC_LICENSE_KEY"])            
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(appPort)
+                .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)appPort).ForPath("/health")))
+            .WithCleanUp(true)
+            .Build(); 
+        
+        await appContainer.StartAsync();
+
+        // config enderecoBase
+        // http://controle-de-cinema-webapp:8080
+        enderecoBase = $"http://{appContainer.Name}:{appPort}";
+    }
+
+    private static async Task EncerrarWebDriverAsync() {
+
         try {
             driver?.Quit();
             driver?.Dispose();
+
+            if (seleniumContainer is not null) {
+                await seleniumContainer.StopAsync();
+                await seleniumContainer.DisposeAsync();
+            }
+
         } catch (Exception ex) {
             // Log ou trate o erro
             Console.WriteLine($"Erro ao fechar o navegador: {ex.Message}");
+        }
+    }
+
+    private static async Task EncerrarBancoAsync() {
+        if (dbContainer is not null) {
+            await dbContainer.StopAsync();
+            await dbContainer.DisposeAsync();
+        }
+    }
+
+    private static async Task EncerrarAplicacaoAsync() {
+        if (appContainer is not null) {
+            await appContainer.StopAsync();
+            await appContainer.DisposeAsync();
         }
     }
 
@@ -119,7 +251,7 @@ public abstract class TestFixture : IDisposable
     private static void ReaplicarCookies(IWebDriver driver, IReadOnlyCollection<OpenQA.Selenium.Cookie> cookies) {
 
         // precisa navegar primeiro
-        driver.Navigate().GoToUrl(enderecoBase); 
+        driver.Navigate().GoToUrl(enderecoBase!); 
         driver.Manage().Cookies.DeleteAllCookies();
 
         foreach (var cookie in cookies)
@@ -174,8 +306,7 @@ public abstract class TestFixture : IDisposable
         wait.Until(d => d.FindElements(By.CssSelector("form[action='/autenticacao/logout']")).Count > 0);
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         // Cleanup se necessário
     }
 }

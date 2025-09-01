@@ -19,7 +19,7 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 
         generoIndex
-            .IrPara(enderecoBase);
+            .IrPara(enderecoBase!);
 
         // Act
         generoIndex
@@ -40,7 +40,7 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 
         generoIndex
-            .IrPara(enderecoBase)
+            .IrPara(enderecoBase!)
             .ClickCadastrar()
             .PreencherDescricao("Suspense")
             .Confirmar();
@@ -48,11 +48,11 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
         // Act
         generoIndex
             .ClickEditar("Suspense")
-            .PreencherDescricao("Terror")
+            .PreencherDescricao("Suspense Editado")
             .Confirmar();
 
         // Assert
-        Assert.IsTrue(generoIndex.ContemGenero("Terror"));
+        Assert.IsTrue(generoIndex.ContemGenero("Suspense Editado"));
     }
 
     [TestMethod]
@@ -64,7 +64,7 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 
         generoIndex
-            .IrPara(enderecoBase)
+            .IrPara(enderecoBase!)
             .ClickCadastrar()
             .PreencherDescricao("Suspense")
             .Confirmar();
