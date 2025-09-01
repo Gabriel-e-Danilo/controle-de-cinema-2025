@@ -15,46 +15,45 @@ public class FilmeFormPageObjects
     private static readonly By DuracaoInput = By.Id("Duracao");
     private static readonly By LancamentoCheck = By.Id("Lancamento");
     private static readonly By GeneroSelect = By.Id("GeneroId");
-    private static readonly By BtnSubmit = By.Id("botaoConfirmar");
+    private static readonly By BtnConfirmar = By.CssSelector("button[data-se='btnConfirmar']");
+    private static readonly By BtnConfirmarExclusao = By.CssSelector("button[data-se='btnConfirmarExclusao']");
     private static readonly By Cards = By.CssSelector(".card");
 
     public FilmeFormPageObjects(IWebDriver driver) {
         this.driver = driver;
         wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-
-        wait.Until(ExpectedConditions.ElementIsVisible(TituloInput));
     }
 
     public FilmeFormPageObjects PreencherTitulo(string titulo) {
-        var el = wait.Until(ExpectedConditions.ElementIsVisible(TituloInput));
+        var webE = wait.Until(ExpectedConditions.ElementIsVisible(TituloInput));
 
-        el.Clear();
-        el.SendKeys(titulo);
+        webE.Clear();
+        webE.SendKeys(titulo);
 
         return this;
     }
 
     public FilmeFormPageObjects PreencherDuracao(int duracao) {
-        var el = wait.Until(ExpectedConditions.ElementIsVisible(DuracaoInput));
+        var webE = wait.Until(ExpectedConditions.ElementIsVisible(DuracaoInput));
 
-        el.Clear();
-        el.SendKeys(duracao.ToString());
+        webE.Clear();
+        webE.SendKeys(duracao.ToString());
 
         return this;
     }
 
     public FilmeFormPageObjects PreencherLancamento(bool lancamento) {
-        var el = wait.Until(ExpectedConditions.ElementToBeClickable(LancamentoCheck));
+        var webE = wait.Until(ExpectedConditions.ElementToBeClickable(LancamentoCheck));
 
-        if (el.Selected != lancamento)
-            Clicks.SafeClick(driver, el);
+        if (webE.Selected != lancamento)
+            Clicks.SafeClick(driver, webE);
 
         return this;
     }
 
     public FilmeFormPageObjects PreencherGenero(string generoTextoVisivel) {
-        var el = wait.Until(ExpectedConditions.ElementIsVisible(GeneroSelect));
-        var select = new SelectElement(el);
+        var webE = wait.Until(ExpectedConditions.ElementIsVisible(GeneroSelect));
+        var select = new SelectElement(webE);
 
         wait.Until(_ => select.Options.Any());
 
@@ -66,7 +65,7 @@ public class FilmeFormPageObjects
     }
 
     public FilmeIndexPageObjects Confirmar() {
-        var btn = Waits.Clickable(driver, BtnSubmit, 20);
+        var btn = Waits.Clickable(driver, BtnConfirmar, 20);
 
         Clicks.SafeClick(driver, btn);
 
@@ -77,7 +76,7 @@ public class FilmeFormPageObjects
     }
 
     public FilmeIndexPageObjects ConfirmarExclusao() {
-        var btn = Waits.Clickable(driver, By.Id("botaoConfirmar"), 20);
+        var btn = Waits.Clickable(driver, BtnConfirmarExclusao, 20);
         Clicks.SafeClick(driver, btn);
 
         wait.Until(_ => driver.Url.Contains("/filmes", StringComparison.OrdinalIgnoreCase));

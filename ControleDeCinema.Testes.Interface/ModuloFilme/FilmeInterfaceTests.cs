@@ -1,4 +1,5 @@
-﻿using ControleDeCinema.Testes.Interface.ModuloGeneroFilme;
+﻿using ControleDeCinema.Testes.Interface.Compartilhado;
+using ControleDeCinema.Testes.Interface.ModuloGeneroFilme;
 using OpenQA.Selenium.Support.UI;
 
 namespace ControleDeCinema.Testes.Interface.ModuloFilme;
@@ -103,11 +104,14 @@ public class FilmeInterfaceTests : TestFixture
             .Confirmar();
 
         // Act
-        filmeIndex
+        filmeIndex = filmeIndex
             .ClickExcluir("Teste")
             .ConfirmarExclusao();
 
         // Assert
-        Assert.IsFalse(filmeIndex.ContemFilme("Teste"));
+        Waits.Eventually(() =>
+        {
+            Assert.IsFalse(filmeIndex.ContemFilme("Teste"));
+        }, tentativas: 10, intervaloMs: 200);
     }
 }

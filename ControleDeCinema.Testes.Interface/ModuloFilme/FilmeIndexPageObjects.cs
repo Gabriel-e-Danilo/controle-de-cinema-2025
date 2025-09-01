@@ -11,6 +11,8 @@ public class FilmeIndexPageObjects
     private readonly WebDriverWait wait;
 
     private static readonly By BtnCadastrar = By.CssSelector("a[data-se='btnCadastrar']");
+    private static readonly By BtnEditar = By.CssSelector("a[data-se='btnEditar']");
+    private static readonly By BtnExcluir = By.CssSelector("a[data-se='btnExcluir']");
     private static readonly By Cards = By.CssSelector(".card");
     private static readonly By FormAnchor = By.Id("Titulo");
 
@@ -41,7 +43,7 @@ public class FilmeIndexPageObjects
     public FilmeFormPageObjects ClickEditar(string titulo) {
         wait.Until(_ => driver.PageSource.Contains(titulo));
 
-        var btn = Waits.Clickable(driver, By.CssSelector(".card a[title='Edição']"), 20);
+        var btn = Waits.Clickable(driver, BtnEditar, 20);
         Clicks.SafeClick(driver, btn);
 
         wait.Until(ExpectedConditions.ElementIsVisible(FormAnchor));
@@ -52,7 +54,7 @@ public class FilmeIndexPageObjects
     public FilmeFormPageObjects ClickExcluir(string titulo) {
         wait.Until(_ => driver.PageSource.Contains(titulo));
 
-        var btn = Waits.Clickable(driver, By.CssSelector(".card a[title='Exclusão']"), 20);
+        var btn = Waits.Clickable(driver, BtnExcluir, 20);
 
         Clicks.SafeClick(driver, btn);
 
