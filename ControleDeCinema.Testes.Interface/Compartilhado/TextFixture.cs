@@ -14,6 +14,9 @@ public abstract class TestFixture : IDisposable
     protected static string enderecoBase = "https://localhost:7131";
     private static string connectionString = "Host=localhost;Port=5432;Database=ControleDeCinemaDb;Username=postgres;Password=YourStrongPassword";
 
+    private static IReadOnlyCollection<Cookie>? cookies;
+    private static bool usuarioRegistrado = false;
+
     [AssemblyInitialize]
     public static void ConfigurarTestes(TestContext _) {
         InicializarWebDriver();
@@ -31,6 +34,9 @@ public abstract class TestFixture : IDisposable
         ConfigurarTabelas(dbContext);
 
         InicializarWebDriver();
+        
+        if (cookies != null && cookies.Any())
+            ReaplicarCookies(driver!, cookies);
     }
 
     private static void InicializarWebDriver() {
@@ -55,6 +61,67 @@ public abstract class TestFixture : IDisposable
         dbContext.Sessoes.RemoveRange(dbContext.Sessoes);
 
         dbContext.SaveChanges();
+    }
+
+    protected static void RegistrarOuLogar() {
+        if (driver is null)
+            throw new ArgumentNullException(nameof(driver));
+
+        // já está logado neste driver?
+        if (driver.Manage().Cookies.AllCookies.Any(c => c.Name == ".AspNetCore.Cookies"))
+            return;
+
+        // reaplica cookies de outro driver se existirem
+        if (cookies != null && cookies.Any()) {
+            ReaplicarCookies(driver, cookies);
+            return;
+        }
+
+        try {
+            // tenta login com usuário fixo
+            driver.Navigate().GoToUrl($"{enderecoBase}/autenticacao/login");
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+            var inputEmail = wait.Until(d => d.FindElement(By.Id("Email")));
+            var inputSenha = wait.Until(d => d.FindElement(By.Id("Senha")));
+
+            inputEmail.Clear();
+            inputEmail.SendKeys("empresa@dominio.com");
+
+            inputSenha.Clear();
+            inputSenha.SendKeys("Teste@123");
+
+            wait.Until(d => {
+                var btn = d.FindElement(By.CssSelector("button[type='submit']"));
+                if (!btn.Enabled || !btn.Displayed) return false;
+                btn.Click();
+                return true;
+            });
+
+            wait.Until(d => !d.Url.Contains("/autenticacao/login", StringComparison.OrdinalIgnoreCase));
+        } catch {
+            // se não encontrar campos de login, registra usuário
+            if (!usuarioRegistrado) {
+                usuarioRegistrado = true;
+                RegistrarContaEmpresarial();
+            }
+        }
+
+        // salva cookies para próximos testes
+        cookies = driver.Manage().Cookies.AllCookies;
+    }
+
+    private static void ReaplicarCookies(IWebDriver driver, IReadOnlyCollection<OpenQA.Selenium.Cookie> cookies) {
+
+        // precisa navegar primeiro
+        driver.Navigate().GoToUrl(enderecoBase); 
+        driver.Manage().Cookies.DeleteAllCookies();
+
+        foreach (var cookie in cookies)
+            driver.Manage().Cookies.AddCookie(cookie);
+
+        // aplica
+        driver.Navigate().Refresh(); 
     }
 
     protected static void RegistrarContaEmpresarial() {

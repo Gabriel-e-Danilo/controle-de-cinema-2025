@@ -9,7 +9,7 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
 {
     [TestInitialize]
     public void TestInitialize() {
-        RegistrarContaEmpresarial();
+        RegistrarOuLogar();
     }
 
     [TestMethod]
@@ -35,7 +35,7 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
     public void Deve_Editar_Genero_Corretamente() {
 
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(10));
 
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 

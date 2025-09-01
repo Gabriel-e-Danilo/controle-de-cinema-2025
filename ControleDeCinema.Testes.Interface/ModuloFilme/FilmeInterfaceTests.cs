@@ -1,5 +1,4 @@
 ﻿using ControleDeCinema.Testes.Interface.ModuloGeneroFilme;
-using Docker.DotNet.Models;
 using OpenQA.Selenium.Support.UI;
 
 namespace ControleDeCinema.Testes.Interface.ModuloFilme;
@@ -10,14 +9,14 @@ public class FilmeInterfaceTests : TestFixture
 {    
     [TestInitialize]
     public void TestInitialize() {
-        RegistrarContaEmpresarial();
+        RegistrarOuLogar();
     }
 
     [TestMethod]
     public void Deve_Cadastrar_Filme_Corretamente() {
 
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(10));
 
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 

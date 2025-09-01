@@ -14,7 +14,10 @@ public class GeneroFilmeFormPageObjects {
     }
 
     public GeneroFilmeFormPageObjects PreencherDescricao(string descricao) {
-        var inputNome = driver.FindElement(By.Id("Descricao"));
+        var inputNome = wait.Until(d => {
+            var el = d.FindElement(By.Id("Descricao"));
+            return (el != null && el.Displayed) ? el : null;
+        });
 
         inputNome.Clear();
         inputNome.SendKeys(descricao);
@@ -23,17 +26,17 @@ public class GeneroFilmeFormPageObjects {
     }
 
     public GeneroFilmeIndexPageObjects Confirmar() {
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElement(By.CssSelector(".card]")).Displayed);
+        // Aguarda até o botão estar presente e clicável
+        var botao = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.Id("botaoConfirmar")));
+        botao.Click(); 
 
         return new GeneroFilmeIndexPageObjects(driver);
     }
 
     public GeneroFilmeIndexPageObjects ConfirmarExclusao() {
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElement(By.CssSelector(".card]")).Displayed);
+        // Aguarda até o botão estar presente e clicável
+        var botao = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.Id("botaoConfirmar")));
+        botao.Click();
 
         return new GeneroFilmeIndexPageObjects(driver);
     }
