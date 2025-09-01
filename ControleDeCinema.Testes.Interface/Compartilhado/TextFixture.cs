@@ -42,14 +42,19 @@ public abstract class TestFixture : IDisposable
     private static void InicializarWebDriver() {
         var options = new ChromeOptions();
 
-        // options.AddArgument("--headless");
+        //options.AddArgument("--headless");
 
         driver = new ChromeDriver(options);
     }
 
     private static void EncerrarWebDriver() {
-        driver?.Quit();
-        driver?.Dispose();
+        try {
+            driver?.Quit();
+            driver?.Dispose();
+        } catch (Exception ex) {
+            // Log ou trate o erro
+            Console.WriteLine($"Erro ao fechar o navegador: {ex.Message}");
+        }
     }
 
     private static void ConfigurarTabelas(ControleDeCinemaDbContext dbContext) {

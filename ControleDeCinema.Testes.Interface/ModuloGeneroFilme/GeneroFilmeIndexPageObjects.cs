@@ -20,19 +20,22 @@ public class GeneroFilmeIndexPageObjects
     }
 
     public GeneroFilmeFormPageObjects ClickCadastrar() {
-        driver.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Click();
+        var btn = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector("a[data-se='btnCadastrar']")));
+            btn.Click();
 
         return new GeneroFilmeFormPageObjects(driver);
     }
 
     public GeneroFilmeFormPageObjects ClickEditar(string descricao) {
-        driver.FindElement(By.CssSelector(".card a[title='Edição']")).Click();
+        var btn = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector(".card a[title='Edição']")));
+        btn.Click();
 
         return new GeneroFilmeFormPageObjects(driver);
     }
 
     public GeneroFilmeFormPageObjects ClickExcluir(string descricao) {
-        driver.FindElement(By.CssSelector(".card a[title='Exclusão']")).Click();
+        var btn = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector(".card a[title='Exclusão']")));
+        btn.Click();
 
         return new GeneroFilmeFormPageObjects(driver);
     }

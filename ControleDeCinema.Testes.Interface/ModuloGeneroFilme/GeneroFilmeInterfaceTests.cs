@@ -59,6 +59,8 @@ public sealed class GeneroFilmeInterfaceTests : TestFixture
     public void Deve_Excluir_Genero_Corretamente() {
 
         // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(10));
+
         var generoIndex = new GeneroFilmeIndexPageObjects(driver!);
 
         generoIndex
