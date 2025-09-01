@@ -37,7 +37,9 @@ public class EditarGeneroFilmeViewModel : FormularioGeneroFilmeViewModel
 public class ExcluirGeneroFilmeViewModel
 {
     public Guid Id { get; set; }
-    public string Descricao { get; set; }
+    public string Descricao { get; set; } = string.Empty;
+
+    public ExcluirGeneroFilmeViewModel() { }
 
     public ExcluirGeneroFilmeViewModel(Guid id, string descricao)
     {
